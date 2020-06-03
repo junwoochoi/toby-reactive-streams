@@ -3,7 +3,7 @@ package com.reactive.tobylive.live;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
-public class DelegateSub<T> implements Subscriber<T> {
+public class DelegateSub<T, R> implements Subscriber<T> {
 
     Subscriber sub;
 
