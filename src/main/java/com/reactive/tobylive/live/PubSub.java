@@ -21,9 +21,10 @@ public class PubSub {
         Publisher<Integer> pub = iterPub(Stream.iterate(1, integer -> integer + 1).limit(10).collect(Collectors.toUnmodifiableList()));
 //        Publisher<Integer> mapPub = mapPub(pub, i -> i * 10);
 //        Publisher<Integer> sumPub = sumPub(pub);
-        Publisher<Integer> reducePub = reducePub(pub, 0, (a, b) -> a + b);
+//        Publisher<Integer> reducePub = reducePub(pub, 0, (a, b) -> a + b);
 
-        reducePub.subscribe(logSub());
+        Publisher<String> mapPub = mapPub(pub, i -> "[" + i + "]");
+        mapPub.subscribe(logSub());
     }
 
     private static Publisher<Integer> reducePub(Publisher<Integer> pub, int seed, BiFunction<Integer, Integer, Integer> f) {
@@ -69,10 +70,10 @@ public class PubSub {
         };
     }
 
-    private static <T> Publisher<T> mapPub(Publisher<T> pub, Function<T, T> f) {
-        return new Publisher<T>() {
+    private static <T,R> Publisher<R> mapPub(Publisher<T> pub, Function<T, R> f) {
+        return new Publisher<R>() {
             @Override
-            public void subscribe(Subscriber<? super T> sub) {
+            public void subscribe(Subscriber<? super R> sub) {
                 pub.subscribe(new DelegateSub<T>(sub) {
                     @Override
                     public void onNext(T integer) {
