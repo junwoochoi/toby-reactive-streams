@@ -21,7 +21,7 @@ public class PubSub {
         Publisher<Integer> pub = iterPub(Stream.iterate(1, integer -> integer + 1).limit(10).collect(Collectors.toUnmodifiableList()));
 //        Publisher<Integer> mapPub = mapPub(pub, i -> i * 10);
 //        Publisher<Integer> sumPub = sumPub(pub);
-        Publisher<String> reducePub = reducePub(pub, "|", (a, b) -> a + "-" + b);
+        Publisher<StringBuilder> reducePub = reducePub(pub, new StringBuilder(), (a, b) -> a.append("-").append(b));
 
         Publisher<String> mapPub = mapPub(pub, i -> "[" + i + "]");
         reducePub.subscribe(logSub());
