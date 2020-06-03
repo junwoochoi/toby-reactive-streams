@@ -6,16 +6,50 @@ import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+
+//Pub -> Data1 -> Op1 -> Data2 -> Op2 -> Data3 -> Sub
 
 @Slf4j
 public class PubSub {
 
     public static void main(String[] args) {
         Publisher<Integer> pub = iterPub(Stream.iterate(1, integer -> integer + 1).limit(10).collect(Collectors.toUnmodifiableList()));
+        Publisher<Integer> mapPub = mapPub(pub, i -> i * 10);
+        Publisher<Integer> map2Pub = mapPub(mapPub, i -> i * -1);
+        map2Pub.subscribe(logSub());
+    }
 
-        pub.subscribe(logSub());
+    private static Publisher<Integer> mapPub(Publisher<Integer> pub, Function<Integer, Integer> f) {
+        return new Publisher<Integer>() {
+            @Override
+            public void subscribe(Subscriber<? super Integer> sub) {
+                pub.subscribe(new Subscriber<Integer>() {
+                    @Override
+                    public void onSubscribe(Subscription s) {
+                        sub.onSubscribe(s);
+                    }
+
+                    @Override
+                    public void onNext(Integer integer) {
+                        sub.onNext(f.apply(integer));
+                    }
+
+                    @Override
+                    public void onError(Throwable t) {
+                        sub.onError(t);
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        sub.onComplete();
+                    }
+                });
+            }
+        };
     }
 
     private static Subscriber<Integer> logSub() {
