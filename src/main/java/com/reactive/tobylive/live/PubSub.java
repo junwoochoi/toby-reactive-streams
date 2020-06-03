@@ -18,16 +18,39 @@ public class PubSub {
 
     public static void main(String[] args) {
         Publisher<Integer> pub = iterPub(Stream.iterate(1, integer -> integer + 1).limit(10).collect(Collectors.toUnmodifiableList()));
-        Publisher<Integer> mapPub = mapPub(pub, i -> i * 10);
-        Publisher<Integer> map2Pub = mapPub(mapPub, i -> i * -1);
-        map2Pub.subscribe(logSub());
+//        Publisher<Integer> mapPub = mapPub(pub, i -> i * 10);
+        Publisher<Integer> sumPub = sumPub(pub);
+
+        sumPub.subscribe(logSub());
+    }
+
+    private static Publisher<Integer> sumPub(Publisher<Integer> pub) {
+        return new Publisher<Integer>() {
+            @Override
+            public void subscribe(Subscriber<? super Integer> sub) {
+                pub.subscribe(new DelegateSub(sub) {
+                    int sum = 0;
+
+                    @Override
+                    public void onNext(Integer integer) {
+                        sum += integer;
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        sub.onNext(sum);
+                        sub.onComplete();
+                    }
+                });
+            }
+        };
     }
 
     private static Publisher<Integer> mapPub(Publisher<Integer> pub, Function<Integer, Integer> f) {
         return new Publisher<Integer>() {
             @Override
             public void subscribe(Subscriber<? super Integer> sub) {
-                pub.subscribe(new DelegateSub(sub){
+                pub.subscribe(new DelegateSub(sub) {
                     @Override
                     public void onNext(Integer integer) {
                         sub.onNext(f.apply(integer));
