@@ -30,7 +30,7 @@ public class PubSub {
         return new Publisher<Integer>() {
             @Override
             public void subscribe(Subscriber<? super Integer> sub) {
-                pub.subscribe(new DelegateSub(sub){
+                pub.subscribe(new DelegateSub<Integer>(sub){
                     int result = seed;
                     @Override
                     public void onNext(Integer integer) {
@@ -51,7 +51,7 @@ public class PubSub {
         return new Publisher<Integer>() {
             @Override
             public void subscribe(Subscriber<? super Integer> sub) {
-                pub.subscribe(new DelegateSub(sub) {
+                pub.subscribe(new DelegateSub<Integer>(sub) {
                     int sum = 0;
 
                     @Override
@@ -69,13 +69,13 @@ public class PubSub {
         };
     }
 
-    private static Publisher<Integer> mapPub(Publisher<Integer> pub, Function<Integer, Integer> f) {
-        return new Publisher<Integer>() {
+    private static <T> Publisher<T> mapPub(Publisher<T> pub, Function<T, T> f) {
+        return new Publisher<T>() {
             @Override
-            public void subscribe(Subscriber<? super Integer> sub) {
-                pub.subscribe(new DelegateSub(sub) {
+            public void subscribe(Subscriber<? super T> sub) {
+                pub.subscribe(new DelegateSub<T>(sub) {
                     @Override
-                    public void onNext(Integer integer) {
+                    public void onNext(T integer) {
                         sub.onNext(f.apply(integer));
                     }
                 });
@@ -83,8 +83,8 @@ public class PubSub {
         };
     }
 
-    private static Subscriber<Integer> logSub() {
-        return new Subscriber<Integer>() {
+    private static <T> Subscriber<T> logSub() {
+        return new Subscriber<T>() {
             @Override
             public void onSubscribe(Subscription subscription) {
                 log.debug("onSubscribe");
@@ -92,7 +92,7 @@ public class PubSub {
             }
 
             @Override
-            public void onNext(Integer integer) {
+            public void onNext(T integer) {
                 log.debug("onNext : {}", integer);
             }
 

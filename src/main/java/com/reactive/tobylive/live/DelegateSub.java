@@ -3,7 +3,7 @@ package com.reactive.tobylive.live;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
-public class DelegateSub implements Subscriber<Integer> {
+public class DelegateSub<T> implements Subscriber<T> {
 
     Subscriber sub;
 
@@ -16,7 +16,7 @@ public class DelegateSub implements Subscriber<Integer> {
     }
 
     @Override
-    public void onNext(Integer integer) {
+    public void onNext(T integer) {
         sub.onNext(integer);
     }
 
